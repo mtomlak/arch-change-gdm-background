@@ -1,17 +1,12 @@
 #!/usr/bin/env bash
-# Autor: Thiago Silva
-# Contact: thiagos.dasilva@gmail.com
-# URL: https://github.com/thiggy01/ubuntu-20.04-change-gdm-background
+# Autor: Thiago Silva; Arch Linux fork by Marian Tomlak
+# Contact: thiagos.dasilva@gmail.com, marian@profiweb.biz
+# URL: https://github.com/mtomlak/arch-change-gdm-background.git
 # =================================================================== #
 
 # Check if script is run by root.
 if [ "$(id -u)" -ne 0 ] ; then
     echo 'This script must be run as root.'
-    exit 1
-fi
-
-if [ ! "$(lsb_release -c | cut -f 2)" == focal ]; then
-    echo 'Sorry, this script only work with Ubuntu 20.04'
     exit 1
 fi
 
@@ -30,7 +25,7 @@ if [ ! -x "$(command -v glib-compile-resources)" ]; then
 fi
 
 # Assign the default gdm theme file path.
-gdm3Resource=/usr/share/gnome-shell/theme/Yaru/gnome-shell-theme.gresource
+gdm3Resource=/usr/share/gnome-shell/gnome-shell-theme.gresource
 
 # Create a backup file of the original theme if there isn't one.
 [ ! -f "$gdm3Resource"~ ] && cp "$gdm3Resource" "$gdm3Resource~"
@@ -51,7 +46,6 @@ fi
 
 # Test if argument is an image file.
 if [[ $(file --mime-type -b "$1") == image/*g ]]; then
-
     # Define more variables.
     gdm3xml=$(basename "$gdm3Resource").xml
     workDir="/tmp/gdm3-theme"
@@ -80,7 +74,7 @@ if [[ $(file --mime-type -b "$1") == image/*g ]]; then
     newImg="#lockDialogGroup {
 	background: url('resource:\/\/\/org\/gnome\/shell\/theme\/$imgFile');
 	background-size: cover; }"
-    perl -i -0777 -pe "s/$oldImg/$newImg/s" "$workDir"/theme/gdm3.css
+    perl -i -0777 -pe "s/$oldImg/$newImg/s" "$workDir"/theme/gnome-shell.css
 
     # Generate gresource xml file.
     echo '<?xml version="1.0" encoding="UTF-8"?>
@@ -108,7 +102,7 @@ if [[ $(file --mime-type -b "$1") == image/*g ]]; then
 	read -p 'Do you want to restart gdm to apply change? (y/n):' -n 1
 	echo
 	if [ "$REPLY" == "y" ]; then
-	    service gdm restart
+	    systemctl restart gdm
 	else
 	    echo "Change will be applied only after restarting gdm"
 	    echo
@@ -128,6 +122,6 @@ else
     # show this message.
     echo 'Image file not foud.'
     echo 'Please, submit a .jpg or .png image file.'
-    echo 'Usage: sudo ./ubuntu-20.04-change-gdm-background /path/to/image.*g'
+    echo 'Usage: sudo ./arch-change-gdm-background /path/to/image.*g'
 
 fi
